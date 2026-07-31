@@ -216,3 +216,12 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+cat >> .gitignore << 'EOF'
+
+# Project-specific
+.env
+docker/secrets/
+*.log
+.streamlit/secrets.toml
+EOF

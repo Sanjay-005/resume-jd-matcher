@@ -1,0 +1,15 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+pydantic-settings
+sqlalchemy
+psycopg2-binary
+celery
+redis
+python-multipart
+pypdf
+python-docx
+huggingface-hub
+groq
+google-generativeai
+qdrant-client
