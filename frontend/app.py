@@ -2,7 +2,8 @@ import streamlit as st
 import requests
 import time
 
-API_URL = "http://127.0.0.1:8001"
+import os
+API_URL = os.environ.get("API_URL", "http://127.0.0.1:8001")
 
 st.set_page_config(page_title="Resume-JD Matcher", layout="wide")
 st.title("📄 Resume-JD Matcher")
