@@ -13,3 +13,4 @@ huggingface-hub
 groq
 google-generativeai
 qdrant-client
+sentence-transformers
