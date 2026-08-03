@@ -56,6 +56,7 @@ services:
         max-file: "3"
 
   backend:
+    image: ${BACKEND_IMAGE:-resume-jd-matcher-backend:latest}
     build: ./backend
     networks: [app-network]
     env_file: .env
@@ -75,6 +76,7 @@ services:
         max-file: "3"
 
   worker:
+    image: ${BACKEND_IMAGE:-resume-jd-matcher-backend:latest}
     build: ./backend
     command: celery -A app.worker.celery_app worker --loglevel=info
     networks: [app-network]
@@ -89,6 +91,7 @@ services:
         max-file: "3"
 
   frontend:
+    image: ${FRONTEND_IMAGE:-resume-jd-matcher-frontend:latest}
     build: ./frontend
     networks: [app-network]
     environment:
