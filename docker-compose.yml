@@ -1,4 +1,3 @@
-version: "3.9"
 
 services:
   redis:
@@ -79,6 +78,8 @@ services:
     image: ${BACKEND_IMAGE:-resume-jd-matcher-backend:latest}
     build: ./backend
     command: celery -A app.worker.celery_app worker --loglevel=info
+    healthcheck:
+      disable: true
     networks: [app-network]
     env_file: .env
     depends_on:
