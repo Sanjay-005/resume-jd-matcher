@@ -27,21 +27,28 @@ Text:
     except json.JSONDecodeError:
         return []
 
-def gap_analysis(resume_text: str, jd_text: str) -> dict:
-    prompt = f"""Compare this resume against this job description. Return ONLY valid JSON with this structure:
-{{"missing_skills": ["skill1", "skill2"], "suggestions": ["specific suggestion 1", "specific suggestion 2"]}}
+def gap_analysis(resume_skills: list[str], jd_skills: list[str], jd_text: str) -> dict:
+    resume_set = {s.lower().strip() for s in resume_skills}
+    jd_set = {s.lower().strip() for s in jd_skills}
+    missing = sorted(jd_set - resume_set)
 
-Resume:
-{resume_text[:2000]}
+    if not missing:
+        return {"missing_skills": [], "suggestions": ["No major skill gaps detected based on extracted skills."]}
 
-Job Description:
-{jd_text[:1500]}
+    prompt = f"""A candidate is missing these specific skills required by a job description: {missing}.
+Given brief context on the role from this job description excerpt:
+{jd_text[:800]}
+
+Return ONLY valid JSON with this structure:
+{{"suggestions": ["specific, actionable suggestion for closing gap 1", "specific suggestion for gap 2"]}}
+Keep suggestions concrete and practical (e.g. course names, project ideas), 2-4 suggestions total.
 """
     result = call_groq(prompt)
     try:
-        return json.loads(result)
+        parsed = json.loads(result)
+        return {"missing_skills": missing, "suggestions": parsed.get("suggestions", [])}
     except json.JSONDecodeError:
-        return {"missing_skills": [], "suggestions": []}
+        return {"missing_skills": missing, "suggestions": []}
 
 def bias_check(jd_text: str) -> dict:
     prompt = f"""Analyze this job description for potentially biased, exclusionary, or inflated language (gendered wording, unrealistic experience requirements, etc). Return ONLY valid JSON:

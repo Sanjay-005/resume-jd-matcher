@@ -1,8 +1,11 @@
-from fastapi import APIRouter, UploadFile, File, Form
+from fastapi import APIRouter, UploadFile, File, Form, Depends
+from sqlalchemy.orm import Session
 from app.worker.tasks import analyze_task
 from app.worker.celery_app import celery_app
 from app.services.vector_store import search_similar_resumes
 from app.services.embeddings import get_embedding
+from app.db.database import get_db
+from app.db.models import AnalysisRecord
 
 router = APIRouter()
 
@@ -32,3 +35,30 @@ def get_result(task_id: str):
     elif result.state == "FAILURE":
         return {"status": "failed", "error": str(result.info)}
     return {"status": result.state}
+
+@router.get("/history")
+def get_history(limit: int = 20, db: Session = Depends(get_db)):
+    records = (
+        db.query(AnalysisRecord)
+        .order_by(AnalysisRecord.created_at.desc())
+        .limit(limit)
+        .all()
+    )
+    return {
+        "count": len(records),
+        "records": [
+            {
+                "id": r.id,
+                "resume_filename": r.resume_filename,
+                "semantic_score": r.semantic_score,
+                "skill_score": r.skill_score,
+                "composite_score": r.composite_score,
+                "resume_skills": r.resume_skills,
+                "jd_skills": r.jd_skills,
+                "gap_analysis": r.gap_analysis,
+                "bias_check": r.bias_check,
+                "created_at": r.created_at.isoformat() if r.created_at else None,
+            }
+            for r in records
+        ]
+    }
